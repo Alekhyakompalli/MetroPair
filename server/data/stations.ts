@@ -1,0 +1,52 @@
+import type { MetroLine } from "../../src/domain.js";
+
+export const STATIONS: Record<MetroLine, string[]> = {
+  Blue: [
+    "Nagole",
+    "Uppal",
+    "Stadium",
+    "NGRI",
+    "Habsiguda",
+    "Tarnaka",
+    "Mettuguda",
+    "Secunderabad East",
+    "Paradise",
+    "Rasoolpura",
+    "Prakash Nagar",
+    "Begumpet",
+    "Ameerpet",
+    "Madhura Nagar",
+    "Yusufguda",
+    "Jubilee Hills Check Post",
+    "Jubilee Hills Road No. 5",
+    "Raidurg",
+  ],
+  Green: ["JBS Parade Ground", "Parade Ground", "MG Bus Station"],
+  Red: [
+    "Miyapur",
+    "JNTU College",
+    "KPHB Colony",
+    "Kukatpally",
+    "Balanagar",
+    "Moosapet",
+    "Bharat Nagar",
+    "Erragadda",
+    "ESI Hospital",
+    "SR Nagar",
+    "Ameerpet",
+    "Punjagutta",
+    "Irrum Manzil",
+    "Khairatabad",
+    "Lakdi-ka-pul",
+    "Assembly",
+    "Nampally",
+    "Gandhi Bhavan",
+    "MG Bus Station",
+    "Malakpet",
+    "Dilsukhnagar",
+    "LB Nagar",
+  ],
+};
+
+export const STATION_SOURCE =
+  "https://huggingface.co/spaces/keerthanakothoju/Hyderabad_Metro";
