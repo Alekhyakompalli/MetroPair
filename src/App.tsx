@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import {
   ArrowRight,
   Check,
   ChevronDown,
   CircleHelp,
   Clock3,
-  Compass,
   MapPin,
   Navigation,
   RotateCw,
@@ -30,12 +29,6 @@ import { checkMatch, fetchStations, findMatch, submitCommuter } from "./lib/api"
 
 type StationData = { stations: string[]; source: string };
 type JourneyState = "matched" | "waiting";
-
-const LINE_COLORS: Record<MetroLine, string> = {
-  Blue: "#3975bb",
-  Green: "#278765",
-  Red: "#d26a59",
-};
 
 function getStationsForLine(payload: Awaited<ReturnType<typeof fetchStations>>, line: MetroLine): string[] {
   if (Array.isArray(payload.stations)) return !payload.line || payload.line === line ? payload.stations : [];
@@ -137,8 +130,6 @@ export default function App() {
   const [metroLine, setMetroLine] = useState<MetroLine>("Blue");
   const [destination, setDestination] = useState("");
   const [stations, setStations] = useState<string[]>([]);
-  const [stationSource, setStationSource] = useState("");
-  const [directorySource, setDirectorySource] = useState("");
   const [availableLines, setAvailableLines] = useState<MetroLine[]>([...METRO_LINES]);
   const [stationsLoading, setStationsLoading] = useState(true);
   const [stationRetry, setStationRetry] = useState(0);
@@ -156,7 +147,6 @@ export default function App() {
     fetchStations()
       .then((response) => {
         if (!alive) return;
-        setDirectorySource(response.source);
         const stationDirectory = response.stations;
         if (!Array.isArray(stationDirectory)) {
           const fromApi = METRO_LINES.filter((line) => Array.isArray(stationDirectory[line]));
@@ -179,13 +169,11 @@ export default function App() {
         if (!alive) return;
         const lineStations = getStationsForLine(response, metroLine);
         setStations(lineStations);
-        setStationSource(response.source);
         if (!lineStations.length) setStationError("There are no destination stations available for this line right now.");
       })
       .catch((error: unknown) => {
         if (!alive) return;
         setStations([]);
-        setStationSource("");
         setStationError(error instanceof Error ? error.message : "We couldn’t load stations. Please try again.");
       })
       .finally(() => { if (alive) setStationsLoading(false); });
@@ -282,8 +270,6 @@ export default function App() {
 
   const lineHasStations = stations.length > 0;
   const canSubmit = name.trim().length > 0 && !!gender && !!destination && !submitting && !stationsLoading && lineHasStations;
-  const attribution = stationSource || directorySource;
-
   return (
     <main className="app-shell">
       <header className="topbar">
@@ -454,24 +440,6 @@ export default function App() {
             )}
           </div>
 
-          <aside className="side-column">
-            <section className="info-card">
-              <div className="info-title"><span className="info-icon"><Compass size={17} /></span><h3>Three lines. One shared ride.</h3></div>
-              <div className="line-list">
-                <div className="line-row" style={{ "--line-color": LINE_COLORS.Blue } as CSSProperties}><span className="swatch" /><strong>Blue</strong><span>Choose a destination</span></div>
-                <div className="line-row" style={{ "--line-color": LINE_COLORS.Green } as CSSProperties}><span className="swatch" /><strong>Green</strong><span>Choose a destination</span></div>
-                <div className="line-row" style={{ "--line-color": LINE_COLORS.Red } as CSSProperties}><span className="swatch" /><strong>Red</strong><span>Choose a destination</span></div>
-              </div>
-              <div className="divider" />
-              <p className="small-copy">Pick a line and destination. We’ll look for another commuter travelling on the same line.</p>
-            </section>
-
-            <section className="safety-card">
-              <span className="safety-icon"><ShieldCheck size={17} /></span>
-              <div><h3>Travel at your comfort</h3><p>Meet in a public station area, share your plans with someone you trust, and only continue if it feels right.</p></div>
-            </section>
-            {attribution && <p className="source-note">Station information: {attribution}</p>}
-          </aside>
         </section>
 
         <footer className="footer">
