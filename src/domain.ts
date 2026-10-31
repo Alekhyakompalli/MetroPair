@@ -1,9 +1,28 @@
 export const METRO_LINES = ["Blue", "Green", "Red"] as const;
+export const GENDER_IDENTITIES = [
+  "female",
+  "male",
+  "non-binary",
+  "another",
+  "prefer-not-to-say",
+] as const;
 
 export type MetroLine = (typeof METRO_LINES)[number];
+export type GenderIdentity = (typeof GENDER_IDENTITIES)[number];
+export type CompanionPreference = "any" | "female-only";
+
+export const GENDER_IDENTITY_LABELS: Record<GenderIdentity, string> = {
+  female: "Female",
+  male: "Male",
+  "non-binary": "Non-binary",
+  another: "Another identity",
+  "prefer-not-to-say": "Prefer not to say",
+};
 
 export interface CommuterDetails {
   name: string;
+  gender: GenderIdentity;
+  companionPreference: CompanionPreference;
   metroLine: MetroLine;
   destination: string;
 }
@@ -14,9 +33,14 @@ export interface CommuterSubmission extends CommuterDetails {
   matched: boolean;
 }
 
+export type PublicCommuterSubmission = Omit<
+  CommuterSubmission,
+  "gender" | "companionPreference"
+>;
+
 export interface MatchResult {
-  submission: CommuterSubmission;
-  match: CommuterSubmission | null;
+  submission: PublicCommuterSubmission;
+  match: PublicCommuterSubmission | null;
 }
 
 export interface MatchStatus {

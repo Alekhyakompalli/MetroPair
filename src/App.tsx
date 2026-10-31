@@ -16,7 +16,16 @@ import {
   UsersRound,
   X,
 } from "lucide-react";
-import { METRO_LINES, type CommuterSubmission, type MatchResult, type MetroLine } from "./domain";
+import {
+  GENDER_IDENTITIES,
+  GENDER_IDENTITY_LABELS,
+  METRO_LINES,
+  type CompanionPreference,
+  type GenderIdentity,
+  type MatchResult,
+  type MetroLine,
+  type PublicCommuterSubmission,
+} from "./domain";
 import { checkMatch, fetchStations, findMatch, submitCommuter } from "./lib/api";
 
 type StationData = { stations: string[]; source: string };
@@ -67,8 +76,8 @@ function MatchPanel({
   onRefresh,
   onStartOver,
 }: {
-  submission: CommuterSubmission;
-  match: CommuterSubmission | null;
+  submission: PublicCommuterSubmission;
+  match: PublicCommuterSubmission | null;
   state: JourneyState;
   checking: boolean;
   error: string;
@@ -123,6 +132,8 @@ function MatchPanel({
 
 export default function App() {
   const [name, setName] = useState("");
+  const [gender, setGender] = useState<GenderIdentity | "">("");
+  const [companionPreference, setCompanionPreference] = useState<CompanionPreference>("any");
   const [metroLine, setMetroLine] = useState<MetroLine>("Blue");
   const [destination, setDestination] = useState("");
   const [stations, setStations] = useState<string[]>([]);
@@ -134,7 +145,7 @@ export default function App() {
   const [stationError, setStationError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const [journey, setJourney] = useState<{ submission: CommuterSubmission; match: CommuterSubmission | null } | null>(null);
+  const [journey, setJourney] = useState<MatchResult | null>(null);
   const [journeyState, setJourneyState] = useState<JourneyState>("waiting");
   const [checking, setChecking] = useState(false);
   const [matchError, setMatchError] = useState("");
@@ -233,11 +244,13 @@ export default function App() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitError("");
-    if (!name.trim() || !destination) return;
+    if (!name.trim() || !gender || !destination) return;
     setSubmitting(true);
     try {
       const result: MatchResult = await submitCommuter({
         name: name.trim(),
+        gender,
+        companionPreference,
         metroLine,
         destination,
       });
@@ -268,7 +281,7 @@ export default function App() {
   }
 
   const lineHasStations = stations.length > 0;
-  const canSubmit = name.trim().length > 0 && !!destination && !submitting && !stationsLoading && lineHasStations;
+  const canSubmit = name.trim().length > 0 && !!gender && !!destination && !submitting && !stationsLoading && lineHasStations;
   const attribution = stationSource || directorySource;
 
   return (
@@ -328,6 +341,58 @@ export default function App() {
                   />
                 </div>
               </div>
+
+              <div className="form-field">
+                <label className="form-label" htmlFor="gender-identity">
+                  Gender identity <small>Used to find a compatible commuter</small>
+                </label>
+                <div className="input-wrap">
+                  <UserRound size={16} />
+                  <select
+                    id="gender-identity"
+                    className="field-control"
+                    value={gender}
+                    onChange={(event) => {
+                      const nextGender = event.target.value as GenderIdentity | "";
+                      setGender(nextGender);
+                      if (nextGender !== "female") setCompanionPreference("any");
+                    }}
+                    required
+                  >
+                    <option value="">Choose your gender identity</option>
+                    {GENDER_IDENTITIES.map((identity) => (
+                      <option key={identity} value={identity}>
+                        {GENDER_IDENTITY_LABELS[identity]}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="select-chevron" size={16} />
+                </div>
+                <p className="line-hint">Self-reported and used for matching; identities aren’t verified.</p>
+              </div>
+
+              {gender === "female" && (
+                <div className="form-field">
+                  <label className="form-label" htmlFor="companion-preference">
+                    Companion preference <small>Choose who you’d like to travel with</small>
+                  </label>
+                  <div className="input-wrap">
+                    <UsersRound size={16} />
+                    <select
+                      id="companion-preference"
+                      className="field-control"
+                      value={companionPreference}
+                      onChange={(event) =>
+                        setCompanionPreference(event.target.value as CompanionPreference)
+                      }
+                    >
+                      <option value="any">Any commuter</option>
+                      <option value="female-only">Female Only</option>
+                    </select>
+                    <ChevronDown className="select-chevron" size={16} />
+                  </div>
+                </div>
+              )}
 
               <div className="form-field">
                 <label className="form-label" htmlFor="metro-line">Metro line <small>Choose your route</small></label>

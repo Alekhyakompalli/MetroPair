@@ -8,7 +8,9 @@ import {
   createSubmission,
   findAvailableMatch,
   getMatchStatus,
+  isValidCompanionPreference,
   isValidDestination,
+  isValidGender,
   isValidLine,
 } from "./matching.js";
 
@@ -38,9 +40,17 @@ app.get("/api/stations", (request, response) => {
 });
 
 app.post("/api/submissions", (request, response) => {
-  const { name, metroLine, destination } = request.body ?? {};
+  const { name, gender, companionPreference, metroLine, destination } = request.body ?? {};
   if (typeof name !== "string" || name.trim().length < 2 || name.trim().length > 60) {
     response.status(400).json({ error: "Enter a name between 2 and 60 characters." });
+    return;
+  }
+  if (!isValidGender(gender)) {
+    response.status(400).json({ error: "Choose a gender identity to continue." });
+    return;
+  }
+  if (!isValidCompanionPreference(gender, companionPreference)) {
+    response.status(400).json({ error: "That passenger preference is not available." });
     return;
   }
   if (!isValidLine(metroLine)) {
@@ -54,6 +64,8 @@ app.post("/api/submissions", (request, response) => {
 
   const details: CommuterDetails = {
     name: name.trim(),
+    gender,
+    companionPreference,
     metroLine,
     destination,
   };

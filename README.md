@@ -28,7 +28,7 @@ npm start
 - `POST /api/matches/find` — retry matching a submitted commuter
 - `GET /api/matches/:submissionId` — check match status while waiting
 
-The matching engine pairs the earliest unmatched commuter on the same line, excludes the current commuter, and allows different destinations.
+The matching engine pairs the earliest compatible unmatched commuter on the same line, excludes the current commuter, and allows different destinations. Commuters select a self-reported gender identity. Female commuters can choose `Female Only`; that preference is enforced for both sides of a waiting match. Gender identity is omitted from match-result cards and is not verified.
 
 ## Station data
 
@@ -36,4 +36,4 @@ The station names and line assignments are adapted from the `metro_graph.py` fil
 
 ## Data and safety limits
 
-Submissions are held in server memory and are cleared when the server restarts. This prototype does not authenticate commuters or verify identities. Do not use it to share real-time location or treat a match as a safety guarantee.
+Submissions are held in server memory and are cleared when the server restarts. This prototype does not authenticate commuters or verify gender identities. Do not use it to share real-time location or treat a match as a safety guarantee.
